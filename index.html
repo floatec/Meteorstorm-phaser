@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>meteor storm</title>
+        <script src="phaser.min.js"></script>
+    </head>
+    <body>
+
+    <script type="text/javascript">
+
+    window.onload = function() {
+        var SPEED=0.2;
+        game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+        function preload () {
+            game.load.image('ship', 'assets/spaceship.png');
+            game.load.image('meteor', 'assets/meteor.png');
+
+            game.load.spritesheet('animation', 'assets/animation.png', 720/8, 95);
+
+            game.load.audio('music', 'assets/music.mp3');
+            game.load.audio('crash', 'assets/crash.ogg');
+        }
+
+        function create () {
+          ship = game.add.sprite(32, game.world.height - 150, 'ship');
+          meteors=[];
+          animations=[];
+          upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+          downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+          leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+          rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+          music = game.add.audio('music');
+          crash = game.add.audio('crash');
+          music.loop = true;
+          music.play();
+        }
+
+        function update() {
+            var dt =game.time.elapsed;
+            if (upKey.isDown)
+            {
+                ship.y-=dt*SPEED;
+            }
+            else if (downKey.isDown)
+            {
+                ship.y+=dt*SPEED;
+            }
+
+            if (leftKey.isDown)
+            {
+                ship.x-=dt*SPEED;
+            }
+            else if (rightKey.isDown)
+            {
+                ship.x+=dt*SPEED;
+            }
+            if(game.rnd.integerInRange(0, 100)==0){
+              meteors.push(newMeteor());
+            }
+            for (var i = 0; i < meteors.length; i++) {
+              meteors[i].update(dt);
+               meteors[i].hit=game.physics.overlap(ship, meteors[i].sprite, meteors[i].collisionHandler,null,this);
+            }
+            for (var i = animations.length-1; i >=0 ; i--) {
+              console.log(animations[i]);
+              if(animations[i].currentFrame.index==7){
+                animations[i].kill();
+              }
+            }
+
+            for (var i = meteors.length-1; i >=0 ; i--) {
+              if(meteors[i].hit){
+                var animation = game.add.sprite( 720/8, 95,'animation');
+                animation.animations.add('explote', [0, 1, 2, 3, 4, 5, 6, 7]);
+                animation.animations.play('explote', 20, true);
+                animation.x = meteors[i].sprite.x;
+                animation.y = meteors[i].sprite.y;
+                animation.loop=true;
+                animations.push(animation);
+                meteors[i].sprite.kill();
+                meteors.splice(i, 1);
+              }
+            }
+      }
+
+      function newMeteor(){
+        var m={};
+        m.sprite=game.add.sprite(game.world.width, game.rnd.integerInRange(0, game.world.height) , 'meteor');
+        m.update=function(dt){
+          m.sprite.x-=dt*SPEED;
+        }
+        m.hit=false;
+        m.collisionHandler=function(){
+          console.log("collision");
+          crash.play();
+        }
+        m.scale=(game.rnd.integerInRange(5, 50)*1.0 )/10.0;
+
+        //m.sprite.scale.set(m.scale );
+        return m;
+      }
+
+};
+
+    </script>
+
+    </body>
+</html>
