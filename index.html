@@ -63,12 +63,7 @@
               meteors[i].update(dt);
                meteors[i].hit=game.physics.overlap(ship, meteors[i].sprite, meteors[i].collisionHandler,null,this);
             }
-            for (var i = animations.length-1; i >=0 ; i--) {
-              console.log(animations[i]);
-              if(animations[i].currentFrame.index==7){
-                animations[i].kill();
-              }
-            }
+
 
             for (var i = meteors.length-1; i >=0 ; i--) {
               if(meteors[i].hit){
@@ -77,7 +72,9 @@
                 animation.animations.play('explote', 20, true);
                 animation.x = meteors[i].sprite.x;
                 animation.y = meteors[i].sprite.y;
-                animation.loop=true;
+                animation.lifespan=20*8;
+                animation.scale.x=meteors[i].scale;
+                animation.scale.y=meteors[i].scale;
                 animations.push(animation);
                 meteors[i].sprite.kill();
                 meteors.splice(i, 1);
@@ -96,9 +93,10 @@
           console.log("collision");
           crash.play();
         }
-        m.scale=(game.rnd.integerInRange(5, 50)*1.0 )/10.0;
+        m.scale=(game.rnd.integerInRange(5, 15)*1.0 )/10.0;
 
-        //m.sprite.scale.set(m.scale );
+        m.sprite.scale.x=m.scale;
+        m.sprite.scale.y=m.scale;
         return m;
       }
 
